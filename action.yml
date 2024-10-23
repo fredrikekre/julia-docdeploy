@@ -33,7 +33,7 @@ runs:
     - name: Install the current package into the `docs` environment
       run: |
         # The Julia command that will be executed
-        julia_cmd=( julia --color=yes --code-coverage --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()' )
+        julia_cmd=( julia --color=yes --code-coverage --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd()))' )
 
         # Add the prefix in front of the command if there is one
         prefix=( ${{ inputs.prefix }} )
@@ -44,6 +44,19 @@ runs:
       shell: bash
       working-directory: ${{inputs.project}}
       if: ${{ inputs.install-package == 'true'}}
+    - name: Instantiate the `docs` environment
+      run: |
+        # The Julia command that will be executed
+        julia_cmd=( julia --color=yes --code-coverage --project=docs/ -e 'using Pkg; Pkg.instantiate()' )
+
+        # Add the prefix in front of the command if there is one
+        prefix=( ${{ inputs.prefix }} )
+        [[ ${#prefix[@]} -gt 0 ]] && julia_cmd=( "${prefix[@]}" "${julia_cmd[@]}" )
+
+        # Run the Julia command
+        "${julia_cmd[@]}"
+      shell: bash
+      working-directory: ${{inputs.project}}
     - name: Build the documentation
       run: |
         # The Julia command that will be executed
